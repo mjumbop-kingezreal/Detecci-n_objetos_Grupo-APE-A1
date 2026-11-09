@@ -1,0 +1,21 @@
+# Entorno virtual
+.venv/
+
+# Configuración privada
+.env
+.env.*
+!.env.example
+
+# Archivos temporales de Python
+__pycache__/
+*.py[cod]
+
+# Modelos descargados
+*.pt
+
+# Resultados temporales
+runs/
+
+# Configuración del editor
+.vscode/
+.idea/

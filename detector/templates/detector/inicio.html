@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f5f0">
+  <title>Detección de objetos</title>
+  <style>
+    :root {
+      --fondo: #f5f5f0; --papel: #fff; --tinta: #25322c;
+      --secundario: #637068; --borde: #dce1da; --verde: #315c45;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--fondo); color: var(--tinta);
+      font-family: "Segoe UI", Arial, sans-serif; font-size: 15px; }
+    button { font: inherit; }
+    svg { display: block; flex-shrink: 0; }
+    [hidden] { display: none !important; }
+    .contenedor { width: min(1080px, calc(100% - 64px)); margin-inline: auto; }
+    .barra { display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; padding-block: 22px; border-bottom: 1px solid var(--borde); }
+    .marca { display: flex; align-items: center; gap: 10px; font-weight: 650;
+      font-size: 14px; letter-spacing: -.2px; }
+    .marca svg { color: var(--verde); }
+    .universidad { color: var(--secundario); font-size: 12px; }
+    .presentacion { padding: 36px 0 26px; }
+    h1 { margin: 0 0 10px; font-size: clamp(28px, 4vw, 36px);
+      line-height: 1.15; font-weight: 650; letter-spacing: -1.1px; }
+    h2 { margin: 0; font-size: 18px; line-height: 1.4; font-weight: 650;
+      letter-spacing: -.3px; }
+    p { line-height: 1.6; }
+    .subtitulo { margin: 0; color: var(--secundario); }
+    .panel { background: var(--papel); border: 1px solid var(--borde);
+      border-radius: 12px; overflow: hidden; }
+    .cabecera { display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; padding: 20px 24px; }
+    .cabecera .subtitulo { margin-top: 4px; font-size: 13px; }
+    .detalle { font-size: 12px; color: var(--secundario); }
+    .zona-camara { display: grid; grid-template-columns: minmax(0, 1fr) 250px;
+      border-top: 1px solid var(--borde); }
+    .visor { position: relative; display: grid; place-items: center;
+      aspect-ratio: 16 / 9; min-height: 270px; overflow: hidden;
+      background: #1d2722; color: #ced8d0; }
+    .espera { display: flex; flex-direction: column; align-items: center;
+      max-width: 320px; padding: 30px; text-align: center; }
+    .espera svg { color: #8da395; margin-bottom: 12px; }
+    #aviso { margin: 0; font-size: 14px; }
+    #video { width: 100%; height: 100%; min-height: 0; object-fit: contain; display: block; }
+    .controles { display: flex; flex-direction: column; justify-content: center;
+      gap: 10px; padding: 24px; border-left: 1px solid var(--borde); }
+    .etiqueta { margin: 0 0 7px; color: var(--secundario); font-size: 11px;
+      font-weight: 650; letter-spacing: 1.2px; text-transform: uppercase; }
+    button { display: inline-flex; align-items: center; justify-content: center;
+      gap: 9px; min-height: 44px; padding: 11px 15px; border: 1px solid var(--borde);
+      border-radius: 6px; background: white; color: var(--tinta); font-size: 13px;
+      font-weight: 600; line-height: 1.4; cursor: pointer;
+      transition: background .15s, border-color .15s; }
+    button svg { width: 17px; height: 17px; }
+    button:hover:not(:disabled) { background: #f0f3ef; border-color: #aab8ad; }
+    button:focus-visible { outline: 3px solid #ad7840; outline-offset: 3px; }
+    button:disabled { cursor: default; color: #8a928c; background: #f4f5f2; border-color: #e5e8e2; }
+    #iniciar { background: var(--verde); border-color: var(--verde); color: white; }
+    #iniciar:hover:not(:disabled) { background: #254c37; border-color: #254c37; }
+    #iniciar:disabled { color: #748a7c; background: #e7ede7; border-color: #e7ede7; }
+    #detener:not(:disabled) { color: #9b4038; border-color: #dbc8c4; }
+    #detener:hover:not(:disabled) { background: #faf0ee; }
+    #guardar:not(:disabled) { color: var(--verde); border-color: #9aafa0; }
+    .ayuda { margin: 8px 0 0; color: var(--secundario); font-size: 12px; line-height: 1.65; }
+    .pie-camara { padding: 15px 24px; border-top: 1px solid var(--borde); background: #fafbf8; }
+    #estado { margin: 0; font-size: 13px; font-weight: 500; }
+    #mensaje { margin: 12px 0 0; padding: 10px 13px; border-left: 3px solid #55795f;
+      background: #eaf2e9; color: #2e5637; font-size: 13px; }
+    #mensaje.error { background: #fbefeb; border-color: #b66650; color: #8b3e2a; }
+    .historial { margin-top: 26px; }
+    #actualizar { min-height: 38px; padding: 8px 12px; font-size: 12px; }
+    .tabla { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;
+      font-variant-numeric: tabular-nums; }
+    th, td { padding: 15px 24px; border-bottom: 1px solid #e8ebe5; white-space: nowrap; }
+    th { color: var(--secundario); background: #f7f8f4; border-top: 1px solid var(--borde);
+      font-size: 11px; font-weight: 650; letter-spacing: .5px; text-transform: uppercase; }
+    th:first-child, td:first-child { width: 80px; color: var(--secundario); }
+    td:nth-child(2) { font-weight: 600; }
+    tbody tr:hover { background: #fafbf8; }
+    td[colspan] { height: 112px; text-align: center; color: var(--secundario); font-size: 13px; }
+    .nota { margin: 0; padding: 16px 24px; color: var(--secundario); font-size: 12px; line-height: 1.6; }
+    footer { display: flex; justify-content: space-between; gap: 12px;
+      padding: 24px 0 32px; color: var(--secundario); font-size: 11px; }
+    @media (max-width: 760px) {
+      .contenedor { width: calc(100% - 32px); }
+      .universidad { max-width: 150px; text-align: right; }
+      .presentacion { padding: 28px 0 22px; }
+      .zona-camara { grid-template-columns: 1fr; }
+      .visor { min-height: 210px; }
+      .controles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+        padding: 18px; border-left: 0; border-top: 1px solid var(--borde); }
+      .etiqueta, .ayuda { grid-column: 1 / -1; }
+      .etiqueta { display: none; }
+      .ayuda { margin-top: 3px; }
+      .cabecera, .pie-camara { padding: 18px; }
+      .detalle { display: none; }
+      th, td { padding: 14px 18px; }
+      .nota { padding: 16px 18px; }
+    }
+    @media (max-width: 480px) {
+      .barra { padding-block: 18px; }
+      .marca { font-size: 12px; }
+      .universidad { font-size: 10px; max-width: 115px; }
+      .controles { grid-template-columns: 1fr 1fr; }
+      #guardar { grid-column: 1 / -1; }
+      .historial .cabecera { align-items: flex-start; flex-direction: column; gap: 12px; }
+      footer { flex-direction: column; gap: 5px; }
+    }
+    @media (prefers-reduced-motion: reduce) { button { transition: none; } }
+  </style>
+</head>
+<body>
+<header class="barra contenedor">
+  <div class="marca">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/><circle cx="12" cy="12" r="4"/></svg>
+    Visión por computadora
+  </div>
+  <span class="universidad">UNEMI · Construcción de Software</span>
+</header>
+<main class="contenedor">
+  <div class="presentacion">
+    <h1>Detección de objetos</h1>
+    <p class="subtitulo">Observa, identifica y guarda lo que encuentra tu cámara.</p>
+  </div>
+  <section class="panel" aria-labelledby="titulo-camara">
+    <div class="cabecera">
+      <h2 id="titulo-camara">Cámara en directo</h2>
+      <span class="detalle">12 categorías de objetos</span>
+    </div>
+    <form id="token" hidden>{% csrf_token %}</form>
+    <div class="zona-camara">
+      <div class="visor">
+        <div class="espera" id="espera">
+          <svg width="44" height="44" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><rect x="4" y="9" width="24" height="18" rx="3"/><path d="m10 9 2-4h8l2 4"/><circle cx="16" cy="18" r="5"/></svg>
+          <p id="aviso">La cámara está detenida</p>
+        </div>
+        <img id="video" alt="Video con objetos detectados" hidden>
+      </div>
+      <div class="controles">
+        <p class="etiqueta">Controles de captura</p>
+        <button id="iniciar" type="button">
+          <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="m6 3 11 7-11 7z"/></svg>
+          Iniciar detección
+        </button>
+        <button id="detener" type="button" disabled>
+          <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><rect x="4" y="4" width="12" height="12" rx="1"/></svg>
+          <span id="texto-detener">Detener</span>
+        </button>
+        <button id="guardar" type="button" disabled>
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 2.5h10l3 3V17H3V2.5z"/><path d="M6 2.5V8h7V2.5M6 17v-6h8v6"/></svg>
+          <span id="texto-guardar">Guardar detección</span>
+        </button>
+        <p class="ayuda">Coloca un objeto frente a la cámara. Al guardar, se registran los objetos detectados en ese momento.</p>
+      </div>
+    </div>
+    <div class="pie-camara">
+      <p id="estado" role="status">Estado: detenido</p>
+      <p id="mensaje" role="status" hidden></p>
+    </div>
+  </section>
+  <section class="panel historial" aria-labelledby="titulo-historial">
+    <div class="cabecera">
+      <div>
+        <h2 id="titulo-historial">Historial de detecciones</h2>
+        <p class="subtitulo" id="total">Cargando registros…</p>
+      </div>
+      <button id="actualizar" type="button">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M16 8a6.2 6.2 0 1 0 .2 4M16 3v5h-5"/></svg>
+        Actualizar historial
+      </button>
+    </div>
+    <div class="tabla" tabindex="0" role="region" aria-label="Registros de detecciones">
+      <table>
+        <thead><tr><th scope="col">ID</th><th scope="col">Objeto</th>
+          <th scope="col">Confianza</th><th scope="col">Fecha y hora (Ecuador)</th></tr></thead>
+        <tbody id="filas"><tr><td colspan="4">Cargando historial…</td></tr></tbody>
+      </table>
+    </div>
+    <p class="nota">Últimos 50 registros. La confianza indica la puntuación del modelo y no garantiza una identificación correcta.</p>
+  </section>
+  <footer>
+    <span>Proyecto de Construcción de Software · UNEMI</span>
+    <span>Solo se guardan resultados, no imágenes ni video.</span>
+  </footer>
+</main>
+<script>
+  const rutas = {
+    video: "{% url 'detector:video' %}", detener: "{% url 'detector:detener' %}",
+    estado: "{% url 'detector:estado' %}", guardar: "{% url 'detector:guardar' %}",
+    historial: "{% url 'detector:historial' %}"
+  };
+  const porId = id => document.getElementById(id);
+  const video = porId("video"), estado = porId("estado");
+  const iniciar = porId("iniciar"), detener = porId("detener"), guardar = porId("guardar");
+  let activo = false, guardando = false, deteniendo = false, consultando = false;
+  let hayObjetos = false, paradaPendiente = false, version = 0;
+  const csrf = document.querySelector('[name="csrfmiddlewaretoken"]').value;
+  const fecha = new Intl.DateTimeFormat("es-EC", {
+    dateStyle: "short", timeStyle: "medium", timeZone: "America/Guayaquil"
+  });
+  const porcentaje = new Intl.NumberFormat("es-EC", { maximumFractionDigits: 1 });
+
+  function avisar(texto, error = false) {
+    const mensaje = porId("mensaje");
+    mensaje.textContent = texto;
+    mensaje.classList.toggle("error", error);
+    mensaje.hidden = !texto;
+  }
+  async function solicitar(url, opciones = {}) {
+    const respuesta = await fetch(url, { cache: "no-store", ...opciones });
+    let datos;
+    try { datos = await respuesta.json(); }
+    catch { throw new Error("No se pudo completar la solicitud. Revisa la terminal."); }
+    if (!respuesta.ok) throw new Error(datos.error || "No se pudo completar la solicitud.");
+    return datos;
+  }
+  function post(url, opciones = {}) {
+    return solicitar(url, { ...opciones, method: "POST", headers: { "X-CSRFToken": csrf } });
+  }
+  function botones() {
+    iniciar.disabled = activo || paradaPendiente || deteniendo;
+    detener.disabled = (!activo && !paradaPendiente) || deteniendo;
+    porId("texto-detener").textContent = paradaPendiente && !deteniendo ? "Reintentar detener" : "Detener";
+    guardar.disabled = !activo || !hayObjetos || guardando || deteniendo;
+  }
+  async function consultarEstado() {
+    if (!activo || consultando) return;
+    consultando = true;
+    const actual = version;
+    try {
+      const datos = await solicitar(rutas.estado);
+      if (!activo || actual !== version) return;
+      hayObjetos = datos.listo && datos.cantidad > 0;
+      estado.textContent = datos.listo
+        ? `Estado: detección activa · ${datos.cantidad} objetos en el último fotograma`
+        : "Estado: esperando imágenes de la cámara…";
+      botones();
+    } catch (error) { if (activo && actual === version) avisar(error.message, true); }
+    finally { consultando = false; }
+  }
+  async function cargarHistorial() {
+    const boton = porId("actualizar");
+    boton.disabled = true;
+    try {
+      const datos = await solicitar(rutas.historial);
+      porId("total").textContent = `${datos.total} registros guardados`;
+      const cuerpo = porId("filas");
+      cuerpo.replaceChildren();
+      if (!datos.registros.length) {
+        const fila = cuerpo.insertRow(), celda = fila.insertCell();
+        celda.colSpan = 4; celda.textContent = "Todavía no hay detecciones guardadas.";
+      }
+      for (const registro of datos.registros) {
+        const fila = cuerpo.insertRow();
+        for (const valor of [registro.id, registro.objeto,
+          `${porcentaje.format(registro.confianza)} %`, fecha.format(new Date(registro.fecha))]) {
+          fila.insertCell().textContent = valor;
+        }
+      }
+    } catch (error) {
+      porId("total").textContent = "No se pudo cargar el historial";
+      avisar(error.message, true);
+    } finally { boton.disabled = false; }
+  }
+  iniciar.addEventListener("click", () => {
+    if (activo || paradaPendiente || deteniendo) return;
+    version++; activo = true; hayObjetos = false;
+    avisar(""); botones();
+    porId("espera").hidden = true; video.hidden = false;
+    estado.textContent = "Estado: iniciando el modelo y la cámara…";
+    video.src = rutas.video + "?t=" + Date.now();
+  });
+  async function parar() {
+    if (deteniendo) return;
+    version++; activo = false; hayObjetos = false; deteniendo = true;
+    paradaPendiente = true;
+    botones();
+    video.removeAttribute("src"); video.hidden = true;
+    porId("espera").hidden = false;
+    porId("aviso").textContent = "Esperando que se libere la cámara…";
+    estado.textContent = "Estado: deteniendo…";
+    const controlador = new AbortController();
+    const limite = Date.now() + 20000;
+    const temporizador = setTimeout(() => controlador.abort(), 20000);
+    try {
+      while (true) {
+        const datos = await post(rutas.detener, { signal: controlador.signal });
+        if (datos.detenido === true) break;
+        if (Date.now() >= limite) throw new Error("La cámara todavía no confirmó la detención. Pulsa Reintentar detener.");
+        await new Promise(resolve => setTimeout(resolve, 400));
+      }
+      paradaPendiente = false;
+      porId("aviso").textContent = "La cámara está detenida";
+      estado.textContent = "Estado: detenido";
+    } catch (error) {
+      porId("aviso").textContent = "No se pudo confirmar que la cámara se detuvo";
+      estado.textContent = "Estado: detención sin confirmar";
+      avisar(controlador.signal.aborted
+        ? "La cámara tardó en responder. Pulsa Reintentar detener."
+        : `${error.message} Puedes reintentar la detención.`, true);
+    } finally {
+      clearTimeout(temporizador);
+      deteniendo = false; botones();
+    }
+  }
+  detener.addEventListener("click", parar);
+  video.addEventListener("error", () => {
+    if (activo) {
+      avisar("No se pudo mostrar el video. Revisa la cámara y la terminal de Django.", true);
+      parar();
+    }
+  });
+  guardar.addEventListener("click", async () => {
+    if (!activo || guardando || !hayObjetos) return;
+    guardando = true; botones(); porId("texto-guardar").textContent = "Guardando…";
+    try {
+      const datos = await post(rutas.guardar);
+      avisar(datos.mensaje);
+      await cargarHistorial();
+    } catch (error) { avisar(error.message, true); }
+    finally { guardando = false; porId("texto-guardar").textContent = "Guardar detección"; botones(); }
+  });
+  porId("actualizar").addEventListener("click", cargarHistorial);
+  window.addEventListener("pagehide", () => {
+    if (activo || paradaPendiente) {
+      const datos = new FormData(); datos.append("csrfmiddlewaretoken", csrf);
+      navigator.sendBeacon(rutas.detener, datos);
+    }
+  });
+  setInterval(consultarEstado, 1000);
+  cargarHistorial();
+</script>
+</body>
+</html>
