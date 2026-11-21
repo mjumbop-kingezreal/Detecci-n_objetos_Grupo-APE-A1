@@ -137,7 +137,8 @@ def video(request):
         if evento.is_set():
             limpiar_transmision(sesion, evento)
             return HttpResponse("Inicio cancelado.", status=409)
-        camara = cv2.VideoCapture(0)
+        indice_camara = int(request.GET.get("camara", 0))
+        camara = cv2.VideoCapture(indice_camara)
         if not camara.isOpened():
             raise RuntimeError("No se pudo abrir la cámara.")
     except Exception:

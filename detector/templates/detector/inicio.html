@@ -1,339 +1,1971 @@
 <!DOCTYPE html>
+<html lang="es" class="dark">
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f5f5f0">
-  <title>Detección de objetos</title>
+  <meta name="theme-color" content="#0b0f19">
+  <meta name="theme-color" content="#f1f5f9">
+  <title>VisionAI Dashboard · Detección de Objetos en Tiempo Real</title>
+
+  <!-- Tipografía: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
   <style>
+    /* ═══════════════════════════════════════════════════════════
+       DARK THEME DESIGN SYSTEM (TECNOLÓGICO PREMIUM)
+       DESIGN SYSTEM (BLANCO OPACO MATE · PREMIUM SAAS)
+    ═══════════════════════════════════════════════════════════ */
     :root {
-      --fondo: #f5f5f0; --papel: #fff; --tinta: #25322c;
-      --secundario: #637068; --borde: #dce1da; --verde: #315c45;
+      --font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+
+      /* Superficies Dark */
+      --bg-dark: #0b0f19;
+      --bg-canvas: #0f172a;
+      --surface-card: #1e293b;
+      --surface-hover: #243247;
+      --surface-subtle: #141f33;
+      /* Superficies: Blanco Opaco / Mate */
+      --bg-matte: #f1f5f9;
+      /* Fondo base blanco opaco suave */
+      --surface-card: #ffffff;
+      /* Tarjetas blanco puro mate */
+      --surface-subtle: #f8fafc;
+      /* Paneles secundarios sutiles */
+      --surface-hover: #f1f5f9;
+
+      /* Bordes y Líneas */
+      --border: #334155;
+      --border-subtle: #1e293b;
+      --border-focus: #475569;
+      --border: #e2e8f0;
+      --border-focus: #cbd5e1;
+
+      /* Tipografía Dark Mode */
+      --text-main: #f8fafc;
+      --text-secondary: #94a3b8;
+      /* Tipografía de Alto Contraste */
+      --text-main: #0f172a;
+      /* Pizarra oscuro para títulos */
+      --text-secondary: #475569;
+      /* Gris neutro para lectura */
+      --text-muted: #64748b;
+      --text-faint: #94a3b8;
+
+      /* Acentos y Neones */
+      --neon-blue: #38bdf8;
+      --neon-blue-glow: rgba(56, 189, 248, 0.35);
+      /* Acentos Profesionales */
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-gradient: linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #4338ca 100%);
+      --primary-glow: 0 0 24px rgba(37, 99, 235, 0.45);
+      --primary-gradient: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      --primary-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.35);
+
+      --emerald-accent: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.25);
+      --emerald-bg: rgba(16, 185, 129, 0.12);
+      --emerald-border: rgba(16, 185, 129, 0.3);
+      --emerald-600: #059669;
+      --emerald-50: #ecfdf5;
+      --emerald-border: #a7f3d0;
+
+      --rose-accent: #f43f5e;
+      --rose-bg: rgba(244, 63, 94, 0.12);
+      --rose-border: rgba(244, 63, 94, 0.3);
+      --rose-600: #e11d48;
+      --rose-50: #fff1f2;
+      --rose-border: #fecdd3;
+
+      --amber-accent: #f59e0b;
+      --amber-bg: rgba(245, 158, 11, 0.12);
+      --amber-border: rgba(245, 158, 11, 0.3);
+      --amber-500: #d97706;
+      --amber-50: #fffbeb;
+
+      /* Radios y Sombras */
+      /* Radios y Sombras Suaves */
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+
+      --shadow-dark: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+      --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.85);
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.05);
+      --shadow-card: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+      --shadow-elevated: 0 12px 20px -4px rgba(15, 23, 42, 0.08);
+      --shadow-modal: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
     }
-    * { box-sizing: border-box; }
-    body { margin: 0; background: var(--fondo); color: var(--tinta);
-      font-family: "Segoe UI", Arial, sans-serif; font-size: 15px; }
-    button { font: inherit; }
-    svg { display: block; flex-shrink: 0; }
-    [hidden] { display: none !important; }
-    .contenedor { width: min(1080px, calc(100% - 64px)); margin-inline: auto; }
-    .barra { display: flex; align-items: center; justify-content: space-between;
-      gap: 16px; padding-block: 22px; border-bottom: 1px solid var(--borde); }
-    .marca { display: flex; align-items: center; gap: 10px; font-weight: 650;
-      font-size: 14px; letter-spacing: -.2px; }
-    .marca svg { color: var(--verde); }
-    .universidad { color: var(--secundario); font-size: 12px; }
-    .presentacion { padding: 36px 0 26px; }
-    h1 { margin: 0 0 10px; font-size: clamp(28px, 4vw, 36px);
-      line-height: 1.15; font-weight: 650; letter-spacing: -1.1px; }
-    h2 { margin: 0; font-size: 18px; line-height: 1.4; font-weight: 650;
-      letter-spacing: -.3px; }
-    p { line-height: 1.6; }
-    .subtitulo { margin: 0; color: var(--secundario); }
-    .panel { background: var(--papel); border: 1px solid var(--borde);
-      border-radius: 12px; overflow: hidden; }
-    .cabecera { display: flex; align-items: center; justify-content: space-between;
-      gap: 16px; padding: 20px 24px; }
-    .cabecera .subtitulo { margin-top: 4px; font-size: 13px; }
-    .detalle { font-size: 12px; color: var(--secundario); }
-    .zona-camara { display: grid; grid-template-columns: minmax(0, 1fr) 250px;
-      border-top: 1px solid var(--borde); }
-    .visor { position: relative; display: grid; place-items: center;
-      aspect-ratio: 16 / 9; min-height: 270px; overflow: hidden;
-      background: #1d2722; color: #ced8d0; }
-    .espera { display: flex; flex-direction: column; align-items: center;
-      max-width: 320px; padding: 30px; text-align: center; }
-    .espera svg { color: #8da395; margin-bottom: 12px; }
-    #aviso { margin: 0; font-size: 14px; }
-    #video { width: 100%; height: 100%; min-height: 0; object-fit: contain; display: block; }
-    .controles { display: flex; flex-direction: column; justify-content: center;
-      gap: 10px; padding: 24px; border-left: 1px solid var(--borde); }
-    .etiqueta { margin: 0 0 7px; color: var(--secundario); font-size: 11px;
-      font-weight: 650; letter-spacing: 1.2px; text-transform: uppercase; }
-    button { display: inline-flex; align-items: center; justify-content: center;
-      gap: 9px; min-height: 44px; padding: 11px 15px; border: 1px solid var(--borde);
-      border-radius: 6px; background: white; color: var(--tinta); font-size: 13px;
-      font-weight: 600; line-height: 1.4; cursor: pointer;
-      transition: background .15s, border-color .15s; }
-    button svg { width: 17px; height: 17px; }
-    button:hover:not(:disabled) { background: #f0f3ef; border-color: #aab8ad; }
-    button:focus-visible { outline: 3px solid #ad7840; outline-offset: 3px; }
-    button:disabled { cursor: default; color: #8a928c; background: #f4f5f2; border-color: #e5e8e2; }
-    #iniciar { background: var(--verde); border-color: var(--verde); color: white; }
-    #iniciar:hover:not(:disabled) { background: #254c37; border-color: #254c37; }
-    #iniciar:disabled { color: #748a7c; background: #e7ede7; border-color: #e7ede7; }
-    #detener:not(:disabled) { color: #9b4038; border-color: #dbc8c4; }
-    #detener:hover:not(:disabled) { background: #faf0ee; }
-    #guardar:not(:disabled) { color: var(--verde); border-color: #9aafa0; }
-    .ayuda { margin: 8px 0 0; color: var(--secundario); font-size: 12px; line-height: 1.65; }
-    .pie-camara { padding: 15px 24px; border-top: 1px solid var(--borde); background: #fafbf8; }
-    #estado { margin: 0; font-size: 13px; font-weight: 500; }
-    #mensaje { margin: 12px 0 0; padding: 10px 13px; border-left: 3px solid #55795f;
-      background: #eaf2e9; color: #2e5637; font-size: 13px; }
-    #mensaje.error { background: #fbefeb; border-color: #b66650; color: #8b3e2a; }
-    .historial { margin-top: 26px; }
-    #actualizar { min-height: 38px; padding: 8px 12px; font-size: 12px; }
-    .tabla { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;
-      font-variant-numeric: tabular-nums; }
-    th, td { padding: 15px 24px; border-bottom: 1px solid #e8ebe5; white-space: nowrap; }
-    th { color: var(--secundario); background: #f7f8f4; border-top: 1px solid var(--borde);
-      font-size: 11px; font-weight: 650; letter-spacing: .5px; text-transform: uppercase; }
-    th:first-child, td:first-child { width: 80px; color: var(--secundario); }
-    td:nth-child(2) { font-weight: 600; }
-    tbody tr:hover { background: #fafbf8; }
-    td[colspan] { height: 112px; text-align: center; color: var(--secundario); font-size: 13px; }
-    .nota { margin: 0; padding: 16px 24px; color: var(--secundario); font-size: 12px; line-height: 1.6; }
-    footer { display: flex; justify-content: space-between; gap: 12px;
-      padding: 24px 0 32px; color: var(--secundario); font-size: 11px; }
-    @media (max-width: 760px) {
-      .contenedor { width: calc(100% - 32px); }
-      .universidad { max-width: 150px; text-align: right; }
-      .presentacion { padding: 28px 0 22px; }
-      .zona-camara { grid-template-columns: 1fr; }
-      .visor { min-height: 210px; }
-      .controles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
-        padding: 18px; border-left: 0; border-top: 1px solid var(--borde); }
-      .etiqueta, .ayuda { grid-column: 1 / -1; }
-      .etiqueta { display: none; }
-      .ayuda { margin-top: 3px; }
-      .cabecera, .pie-camara { padding: 18px; }
-      .detalle { display: none; }
-      th, td { padding: 14px 18px; }
-      .nota { padding: 16px 18px; }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
-    @media (max-width: 480px) {
-      .barra { padding-block: 18px; }
-      .marca { font-size: 12px; }
-      .universidad { font-size: 10px; max-width: 115px; }
-      .controles { grid-template-columns: 1fr 1fr; }
-      #guardar { grid-column: 1 / -1; }
-      .historial .cabecera { align-items: flex-start; flex-direction: column; gap: 12px; }
-      footer { flex-direction: column; gap: 5px; }
+
+    body {
+      background-color: var(--bg-dark);
+      background-color: var(--bg-matte);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
-    @media (prefers-reduced-motion: reduce) { button { transition: none; } }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      outline: none;
+    }
+
+    svg {
+      display: block;
+      flex-shrink: 0;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       LAYOUT CONTAINER (1440px / 92% ANCHO)
+    ═══════════════════════════════════════════════════════════ */
+    .container {
+      width: min(1440px, 92%);
+      margin-inline: auto;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       NAVBAR OSCURA
+       NAVBAR (BLANCO OPACO TRASLÚCIDO)
+    ═══════════════════════════════════════════════════════════ */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .navbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 70px;
+      gap: 20px;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      background: var(--primary-gradient);
+      color: #ffffff;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 0 16px rgba(37, 99, 235, 0.4);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    }
+
+    .brand-text h2 {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.3px;
+      line-height: 1.2;
+    }
+
+    .brand-text span {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      color: var(--text-muted);
+    }
+
+    .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .system-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: var(--surface-card);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .system-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--emerald-accent);
+      background: var(--emerald-600);
+      position: relative;
+    }
+
+    .system-dot::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      background: rgba(16, 185, 129, 0.4);
+      background: rgba(5, 150, 105, 0.35);
+      animation: pulse-ring 2s infinite;
+    }
+
+    @keyframes pulse-ring {
+      0% {
+        transform: scale(0.9);
+        opacity: 1;
+      }
+
+      100% {
+        transform: scale(1.8);
+        opacity: 0;
+      }
+    }
+
+    .uni-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: rgba(30, 41, 59, 0.6);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      color: var(--text-muted);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       HEADER DEL DASHBOARD
+       HEADER DEL DASHBOARD (LIMPIO Y SIN TARJETAS SUPERIORES)
+    ═══════════════════════════════════════════════════════════ */
+    .dashboard-header {
+      padding: 32px 0 24px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      color: var(--neon-blue);
+      background: #e0e7ff;
+      border: 1px solid rgba(79, 70, 229, 0.15);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      margin-bottom: 12px;
+    }
+
+    .hero-badge svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .dashboard-title {
+      font-size: clamp(26px, 3vw, 34px);
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.8px;
+      line-height: 1.2;
+    }
+
+    .dashboard-subtitle {
+      margin-top: 6px;
+      font-size: 15px;
+      color: var(--text-secondary);
+      max-width: 720px;
+      font-weight: 400;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       LAYOUT DE 2 COLUMNAS (70% / 30%)
+    ═══════════════════════════════════════════════════════════ */
+    .main-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 7fr) minmax(320px, 3fr);
+      gap: 24px;
+      align-items: start;
+      margin-bottom: 32px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       TARJETAS Y PANELES DARK
+       TARJETAS EN BLANCO OPACO MATE
+    ═══════════════════════════════════════════════════════════ */
+    .card {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-dark);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-elevated);
+      border-color: var(--border-focus);
+    }
+
+    .card-header {
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(30, 41, 59, 0.6);
+      background: #ffffff;
+    }
+
+    .card-header-left h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.2px;
+    }
+
+    .card-header-left p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      color: var(--text-muted);
+      margin-top: 2px;
+      font-weight: 400;
+    }
+
+    /* Badges de Estado */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+
+    .badge-live {
+      background: var(--rose-bg);
+      color: #fb7185;
+      background: var(--rose-50);
+      color: var(--rose-600);
+      border: 1px solid var(--rose-border);
+    }
+
+    .badge-live::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #f43f5e;
+      background: var(--rose-600);
+      animation: pulse-dot 1.4s ease-in-out infinite;
+    }
+
+    .badge-idle {
+      background: rgba(51, 65, 85, 0.4);
+      color: var(--text-secondary);
+      background: var(--surface-subtle);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .badge-idle::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      background: var(--text-faint);
+    }
+
+    @keyframes pulse-dot {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.35;
+        transform: scale(0.8);
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       COLUMNA IZQUIERDA (70%): VISOR DE CÁMARA
+    ═══════════════════════════════════════════════════════════ */
+    .camera-column {
+      width: 100%;
+    }
+
+    .camera-card {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .camera-viewport {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      min-height: 420px;
+      background: #060911;
+      background: #0f172a;
+      /* Apertura oscura elegante para el stream */
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+
+    /* Retículas sutiles de visor de IA */
+    .camera-viewport::before,
+    .camera-viewport::after {
+      content: '';
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .camera-viewport::before {
+      top: 18px;
+      left: 18px;
+      border-top: 2px solid rgba(56, 189, 248, 0.35);
+      border-left: 2px solid rgba(56, 189, 248, 0.35);
+      border-top: 2px solid rgba(255, 255, 255, 0.3);
+      border-left: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .camera-viewport::after {
+      bottom: 18px;
+      right: 18px;
+      border-bottom: 2px solid rgba(56, 189, 248, 0.35);
+      border-right: 2px solid rgba(56, 189, 248, 0.35);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+      border-right: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .camera-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 32px;
+      max-width: 380px;
+      color: var(--text-secondary);
+      color: #94a3b8;
+    }
+
+    .placeholder-icon-wrap {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      display: grid;
+      place-items: center;
+      margin-bottom: 18px;
+      color: var(--neon-blue);
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.1);
+      color: #cbd5e1;
+    }
+
+    .placeholder-icon-wrap svg {
+      width: 34px;
+      height: 34px;
+    }
+
+    #aviso {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      color: #ffffff;
+      letter-spacing: -0.2px;
+    }
+
+    #aviso-sub {
+      margin-top: 6px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    #video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      background: #000000;
+    }
+
+    .camera-footer {
+      padding: 16px 24px;
+      background: rgba(30, 41, 59, 0.4);
+      background: #ffffff;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      background: var(--text-faint);
+      flex-shrink: 0;
+    }
+
+    .status-dot.active {
+      background: var(--emerald-accent);
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
+      background: var(--emerald-600);
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
+    }
+
+    .status-dot.stopping {
+      background: var(--amber-accent);
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.6);
+      background: var(--amber-500);
+      box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.2);
+    }
+
+    #estado {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .camera-spec {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: rgba(15, 23, 42, 0.6);
+      color: var(--text-muted);
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+    }
+
+    .camera-msg-container {
+      padding: 0 24px 16px;
+    }
+
+    #mensaje {
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 600;
+      background: var(--emerald-bg);
+      color: #34d399;
+      background: var(--emerald-50);
+      color: #065f46;
+      border: 1px solid var(--emerald-border);
+    }
+
+    #mensaje.error {
+      background: var(--rose-bg);
+      color: #fb7185;
+      background: var(--rose-50);
+      color: #9f1239;
+      border-color: var(--rose-border);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       COLUMNA DERECHA (30%): CONTROLES DE CAPTURA
+    ═══════════════════════════════════════════════════════════ */
+    .controls-column {
+      width: 100%;
+    }
+
+    .controls-panel {
+      padding: 24px;
+    }
+
+    .controls-header {
+      margin-bottom: 22px;
+    }
+
+    .controls-header h4 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.2px;
+    }
+
+    .controls-header p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .controls-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Botones Tecnológicos */
+    /* Botones Profesionales */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      height: 50px;
+      padding: 0 20px;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      user-select: none;
+    }
+
+    .btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Botón Iniciar (Azul Neón / Vibrante) */
+    /* Botón Iniciar (Azul Intenso Vibrante) */
+    .btn-primary {
+      background: var(--primary-gradient);
+      color: #ffffff;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      box-shadow: var(--primary-glow);
+      box-shadow: var(--primary-shadow);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(37, 99, 235, 0.7);
+      border-color: var(--neon-blue);
+      filter: brightness(1.1);
+      box-shadow: 0 14px 24px -4px rgba(37, 99, 235, 0.45);
+      filter: brightness(1.05);
+    }
+
+    .btn-primary:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: var(--primary-glow);
+      box-shadow: var(--primary-shadow);
+    }
+
+    .btn-primary:disabled {
+      background: #1e293b;
+      color: var(--text-muted);
+      border-color: #334155;
+      background: #cbd5e1;
+      color: #64748b;
+      box-shadow: none;
+      cursor: not-allowed;
+      opacity: 0.5;
+      opacity: 0.7;
+    }
+
+    /* Botón Detener */
+    .btn-danger {
+      background: rgba(30, 41, 59, 0.6);
+      color: #fb7185;
+      background: #ffffff;
+      color: var(--rose-600);
+      border: 1px solid var(--rose-border);
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background: var(--rose-bg);
+      border-color: var(--rose-accent);
+      background: var(--rose-50);
+      border-color: #f43f5e;
+      transform: translateY(-1px);
+      box-shadow: 0 0 16px rgba(244, 63, 94, 0.25);
+      box-shadow: 0 4px 12px rgba(225, 29, 72, 0.12);
+    }
+
+    .btn-danger:disabled {
+      background: transparent;
+      color: var(--text-muted);
+      background: var(--surface-subtle);
+      color: var(--text-faint);
+      border-color: var(--border);
+      cursor: not-allowed;
+      opacity: 0.4;
+      opacity: 0.6;
+    }
+
+    /* Botón Guardar */
+    .btn-success {
+      background: rgba(30, 41, 59, 0.6);
+      color: #34d399;
+      background: #ffffff;
+      color: var(--emerald-600);
+      border: 1px solid var(--emerald-border);
+    }
+
+    .btn-success:hover:not(:disabled) {
+      background: var(--emerald-bg);
+      border-color: var(--emerald-accent);
+      background: var(--emerald-50);
+      border-color: #10b981;
+      transform: translateY(-1px);
+      box-shadow: 0 0 16px rgba(16, 185, 129, 0.25);
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.12);
+    }
+
+    .btn-success:disabled {
+      background: transparent;
+      color: var(--text-muted);
+      background: var(--surface-subtle);
+      color: var(--text-faint);
+      border-color: var(--border);
+      cursor: not-allowed;
+      opacity: 0.4;
+      opacity: 0.6;
+    }
+
+    /* Tip de Captura */
+    .controls-tip {
+      margin-top: 20px;
+      padding: 14px;
+      border-radius: var(--radius-md);
+      background: rgba(15, 23, 42, 0.7);
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .tip-icon {
+      color: var(--neon-blue);
+      color: var(--primary);
+      margin-top: 2px;
+    }
+
+    .tip-text {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       HISTORIAL DE DETECCIONES (100% ANCHO INFERIOR)
+    ═══════════════════════════════════════════════════════════ */
+    .history-card {
+      margin-bottom: 48px;
+    }
+
+    .btn-outline {
+      height: 38px;
+      padding: 0 14px;
+      border-radius: var(--radius-sm);
+      background: rgba(30, 41, 59, 0.8);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-outline:hover:not(:disabled) {
+      background: var(--surface-hover);
+      background: var(--surface-subtle);
+      border-color: var(--border-focus);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+    }
+
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    th {
+      padding: 14px 24px;
+      background: rgba(15, 23, 42, 0.7);
+      color: var(--text-secondary);
+      background: var(--surface-subtle);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-main);
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      transition: background-color 0.12s ease;
+    }
+
+    tbody tr:hover {
+      background-color: rgba(36, 50, 71, 0.45);
+      background-color: var(--surface-subtle);
+    }
+
+    .col-id {
+      width: 90px;
+      color: var(--text-muted);
+      font-family: monospace;
+      font-weight: 600;
+    }
+
+    .col-object {
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .object-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      background: rgba(15, 23, 42, 0.8);
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    /* Barra visual brillante de confianza (Azul/Verde Neón) */
+    /* Barra visual de confianza */
+    .confidence-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .confidence-bar-bg {
+      width: 100px;
+      height: 6px;
+      background: #0f172a;
+      background: #e2e8f0;
+      border-radius: 9999px;
+      overflow: hidden;
+      border: 1px solid #1e293b;
+    }
+
+    .confidence-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #2563eb 0%, #38bdf8 60%, #10b981 100%);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+      background: linear-gradient(90deg, #2563eb 0%, #10b981 100%);
+      border-radius: 9999px;
+      transition: width 0.3s ease;
+    }
+
+    .confidence-value {
+      font-size: 13px;
+      font-weight: 700;
+      color: #38bdf8;
+      color: var(--text-main);
+      min-width: 52px;
+      text-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
+    }
+
+    .col-date {
+      color: var(--text-secondary);
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .table-empty {
+      padding: 48px 24px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .history-footer {
+      padding: 14px 24px;
+      background: rgba(15, 23, 42, 0.7);
+      background: var(--surface-subtle);
+      border-top: 1px solid var(--border);
+      color: var(--text-secondary);
+      color: var(--text-muted);
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════════════════════════ */
+    footer {
+      border-top: 1px solid var(--border);
+      background: var(--bg-dark);
+      background: #ffffff;
+      padding: 24px 0;
+      margin-top: auto;
+    }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      color: var(--text-muted);
+    }
+
+    .footer-secure {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #34d399;
+      color: var(--emerald-600);
+      font-weight: 600;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       MODAL DE PERMISOS NATIVOS DARK
+       MODAL DE PERMISOS NATIVOS
+    ═══════════════════════════════════════════════════════════ */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: grid;
+      place-items: center;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-overlay.visible {
+      opacity: 1;
+    }
+
+    .modal-card {
+      width: min(440px, calc(100% - 32px));
+      background: var(--surface-card);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-modal);
+      padding: 32px 28px 24px;
+      text-align: center;
+      transform: translateY(16px) scale(0.97);
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .modal-overlay.visible .modal-card {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-icon-badge {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(37, 99, 235, 0.15);
+      color: var(--neon-blue);
+      background: #e0e7ff;
+      color: var(--primary);
+      display: grid;
+      place-items: center;
+      margin: 0 auto 20px;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+    }
+
+    .modal-icon-badge svg {
+      width: 30px;
+      height: 30px;
+    }
+
+    .modal-card h3 {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.4px;
+      margin-bottom: 8px;
+    }
+
+    .modal-card p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.55;
+      margin-bottom: 22px;
+    }
+
+    .modal-status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px;
+      margin-bottom: 20px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 600;
+      text-align: left;
+    }
+
+    .modal-status.loading {
+      background: var(--amber-bg);
+      color: #fbbf24;
+      border: 1px solid var(--amber-border);
+      background: var(--amber-50);
+      color: #92400e;
+      border: 1px solid #fde68a;
+    }
+
+    .modal-status.error {
+      background: var(--rose-bg);
+      color: #fb7185;
+      background: var(--rose-50);
+      color: #9f1239;
+      border: 1px solid var(--rose-border);
+    }
+
+    .modal-status.success {
+      background: var(--emerald-bg);
+      color: #34d399;
+      background: var(--emerald-50);
+      color: #065f46;
+      border: 1px solid var(--emerald-border);
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid currentColor;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .modal-features {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+
+    .modal-feature-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      background: rgba(15, 23, 42, 0.6);
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .modal-feature-item svg {
+      width: 18px;
+      height: 18px;
+      color: #34d399;
+      color: var(--emerald-600);
+      flex-shrink: 0;
+    }
+
+    .camera-select-box {
+      margin-bottom: 22px;
+      text-align: left;
+    }
+
+    .camera-select-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .camera-select-input {
+      width: 100%;
+      height: 44px;
+      padding: 0 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: #0f172a;
+      background: var(--surface-subtle);
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 6l3.5 4 3.5-4z'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 6l3.5 4 3.5-4z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      cursor: pointer;
+    }
+
+    .camera-select-input:focus {
+      outline: 2px solid var(--primary);
+      outline-offset: 1px;
+    }
+
+    .modal-actions {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 10px;
+    }
+
+    .btn-modal-cancel {
+      height: 46px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: rgba(15, 23, 42, 0.6);
+      background: #ffffff;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 600;
+      transition: background 0.15s ease;
+    }
+
+    .btn-modal-cancel:hover {
+      background: var(--surface-hover);
+      background: var(--surface-subtle);
+      color: var(--text-main);
+    }
+
+    .btn-modal-confirm {
+      height: 46px;
+      border-radius: var(--radius-md);
+      background: var(--primary-gradient);
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 700;
+      box-shadow: 0 0 16px rgba(37, 99, 235, 0.4);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-modal-confirm:hover:not(:disabled) {
+      filter: brightness(1.1);
+      box-shadow: 0 0 24px rgba(37, 99, 235, 0.6);
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       RESPONSIVE DESIGN (TABLETS & MOBILE)
+    ═══════════════════════════════════════════════════════════ */
+    @media (max-width: 1080px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .camera-viewport {
+        min-height: 340px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        width: calc(100% - 32px);
+      }
+
+      .navbar-inner {
+        height: 64px;
+      }
+
+      .system-pill {
+        display: none;
+      }
+
+      .dashboard-header {
+        padding: 24px 0 16px;
+      }
+
+      .camera-viewport {
+        min-height: 240px;
+      }
+
+      .camera-footer {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .modal-actions {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
-<body>
-<header class="barra contenedor">
-  <div class="marca">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/><circle cx="12" cy="12" r="4"/></svg>
-    Visión por computadora
-  </div>
-  <span class="universidad">UNEMI · Construcción de Software</span>
-</header>
-<main class="contenedor">
-  <div class="presentacion">
-    <h1>Detección de objetos</h1>
-    <p class="subtitulo">Observa, identifica y guarda lo que encuentra tu cámara.</p>
-  </div>
-  <section class="panel" aria-labelledby="titulo-camara">
-    <div class="cabecera">
-      <h2 id="titulo-camara">Cámara en directo</h2>
-      <span class="detalle">12 categorías de objetos</span>
-    </div>
-    <form id="token" hidden>{% csrf_token %}</form>
-    <div class="zona-camara">
-      <div class="visor">
-        <div class="espera" id="espera">
-          <svg width="44" height="44" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><rect x="4" y="9" width="24" height="18" rx="3"/><path d="m10 9 2-4h8l2 4"/><circle cx="16" cy="18" r="5"/></svg>
-          <p id="aviso">La cámara está detenida</p>
-        </div>
-        <img id="video" alt="Video con objetos detectados" hidden>
-      </div>
-      <div class="controles">
-        <p class="etiqueta">Controles de captura</p>
-        <button id="iniciar" type="button">
-          <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="m6 3 11 7-11 7z"/></svg>
-          Iniciar detección
-        </button>
-        <button id="detener" type="button" disabled>
-          <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><rect x="4" y="4" width="12" height="12" rx="1"/></svg>
-          <span id="texto-detener">Detener</span>
-        </button>
-        <button id="guardar" type="button" disabled>
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 2.5h10l3 3V17H3V2.5z"/><path d="M6 2.5V8h7V2.5M6 17v-6h8v6"/></svg>
-          <span id="texto-guardar">Guardar detección</span>
-        </button>
-        <p class="ayuda">Coloca un objeto frente a la cámara. Al guardar, se registran los objetos detectados en ese momento.</p>
-      </div>
-    </div>
-    <div class="pie-camara">
-      <p id="estado" role="status">Estado: detenido</p>
-      <p id="mensaje" role="status" hidden></p>
-    </div>
-  </section>
-  <section class="panel historial" aria-labelledby="titulo-historial">
-    <div class="cabecera">
-      <div>
-        <h2 id="titulo-historial">Historial de detecciones</h2>
-        <p class="subtitulo" id="total">Cargando registros…</p>
-      </div>
-      <button id="actualizar" type="button">
-        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M16 8a6.2 6.2 0 1 0 .2 4M16 3v5h-5"/></svg>
-        Actualizar historial
-      </button>
-    </div>
-    <div class="tabla" tabindex="0" role="region" aria-label="Registros de detecciones">
-      <table>
-        <thead><tr><th scope="col">ID</th><th scope="col">Objeto</th>
-          <th scope="col">Confianza</th><th scope="col">Fecha y hora (Ecuador)</th></tr></thead>
-        <tbody id="filas"><tr><td colspan="4">Cargando historial…</td></tr></tbody>
-      </table>
-    </div>
-    <p class="nota">Últimos 50 registros. La confianza indica la puntuación del modelo y no garantiza una identificación correcta.</p>
-  </section>
-  <footer>
-    <span>Proyecto de Construcción de Software · UNEMI</span>
-    <span>Solo se guardan resultados, no imágenes ni video.</span>
-  </footer>
-</main>
-<script>
-  const rutas = {
-    video: "{% url 'detector:video' %}", detener: "{% url 'detector:detener' %}",
-    estado: "{% url 'detector:estado' %}", guardar: "{% url 'detector:guardar' %}",
-    historial: "{% url 'detector:historial' %}"
-  };
-  const porId = id => document.getElementById(id);
-  const video = porId("video"), estado = porId("estado");
-  const iniciar = porId("iniciar"), detener = porId("detener"), guardar = porId("guardar");
-  let activo = false, guardando = false, deteniendo = false, consultando = false;
-  let hayObjetos = false, paradaPendiente = false, version = 0;
-  const csrf = document.querySelector('[name="csrfmiddlewaretoken"]').value;
-  const fecha = new Intl.DateTimeFormat("es-EC", {
-    dateStyle: "short", timeStyle: "medium", timeZone: "America/Guayaquil"
-  });
-  const porcentaje = new Intl.NumberFormat("es-EC", { maximumFractionDigits: 1 });
 
-  function avisar(texto, error = false) {
-    const mensaje = porId("mensaje");
-    mensaje.textContent = texto;
-    mensaje.classList.toggle("error", error);
-    mensaje.hidden = !texto;
-  }
-  async function solicitar(url, opciones = {}) {
-    const respuesta = await fetch(url, { cache: "no-store", ...opciones });
-    let datos;
-    try { datos = await respuesta.json(); }
-    catch { throw new Error("No se pudo completar la solicitud. Revisa la terminal."); }
-    if (!respuesta.ok) throw new Error(datos.error || "No se pudo completar la solicitud.");
-    return datos;
-  }
-  function post(url, opciones = {}) {
-    return solicitar(url, { ...opciones, method: "POST", headers: { "X-CSRFToken": csrf } });
-  }
-  function botones() {
-    iniciar.disabled = activo || paradaPendiente || deteniendo;
-    detener.disabled = (!activo && !paradaPendiente) || deteniendo;
-    porId("texto-detener").textContent = paradaPendiente && !deteniendo ? "Reintentar detener" : "Detener";
-    guardar.disabled = !activo || !hayObjetos || guardando || deteniendo;
-  }
-  async function consultarEstado() {
-    if (!activo || consultando) return;
-    consultando = true;
-    const actual = version;
-    try {
-      const datos = await solicitar(rutas.estado);
-      if (!activo || actual !== version) return;
-      hayObjetos = datos.listo && datos.cantidad > 0;
-      estado.textContent = datos.listo
-        ? `Estado: detección activa · ${datos.cantidad} objetos en el último fotograma`
-        : "Estado: esperando imágenes de la cámara…";
-      botones();
-    } catch (error) { if (activo && actual === version) avisar(error.message, true); }
-    finally { consultando = false; }
-  }
-  async function cargarHistorial() {
-    const boton = porId("actualizar");
-    boton.disabled = true;
-    try {
-      const datos = await solicitar(rutas.historial);
-      porId("total").textContent = `${datos.total} registros guardados`;
-      const cuerpo = porId("filas");
-      cuerpo.replaceChildren();
-      if (!datos.registros.length) {
-        const fila = cuerpo.insertRow(), celda = fila.insertCell();
-        celda.colSpan = 4; celda.textContent = "Todavía no hay detecciones guardadas.";
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════════
+     MODAL DE PERMISOS NATIVOS Y SELECCIÓN DE HARDWARE
+═══════════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="modal-permiso" hidden>
+    <div class="modal-card" role="dialog" aria-labelledby="modal-titulo" aria-describedby="modal-desc">
+      <div class="modal-icon-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
+          <circle cx="12" cy="13" r="3" />
+        </svg>
+      </div>
+      <h3 id="modal-titulo">Permiso de Cámara</h3>
+      <p id="modal-desc">El navegador solicitará acceso a la cámara para ejecutar el modelo de detección en tiempo real.
+      </p>
+
+      <!-- Estado Dinámico -->
+      <div class="modal-status loading" id="modal-estado" hidden>
+        <div class="spinner"></div>
+        <span id="modal-estado-texto">Esperando confirmación en el cuadro emergente del navegador…</span>
+      </div>
+
+      <!-- Garantías de Privacidad -->
+      <div class="modal-features" id="modal-info">
+        <div class="modal-feature-item">
+          <svg viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd"
+              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+              clip-rule="evenodd" />
+          </svg>
+          <span>Procesamiento local confidencial</span>
+        </div>
+        <div class="modal-feature-item">
+          <svg viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd"
+              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+              clip-rule="evenodd" />
+          </svg>
+          <span>No se guardan imágenes ni video en disco</span>
+        </div>
+        <div class="modal-feature-item">
+          <svg viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd"
+              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+              clip-rule="evenodd" />
+          </svg>
+          <span>Puedes detener el sensor en cualquier momento</span>
+        </div>
+      </div>
+
+      <!-- Selector de hardware si hay múltiples cámaras -->
+      <div class="camera-select-box" id="selector-camara" hidden>
+        <label class="camera-select-label" for="lista-camaras">Dispositivo de Entrada</label>
+        <select class="camera-select-input" id="lista-camaras">
+          <option value="0">Cámara predeterminada (Índice 0)</option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-modal-cancel" id="modal-cancelar" type="button">Cancelar</button>
+        <button class="btn-modal-confirm" id="modal-permitir" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 13l4 4L19 7" />
+          </svg>
+          <span id="modal-btn-texto">Permitir y Activar</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+     HEADER / NAVBAR
+═══════════════════════════════════════════════════════════ -->
+  <header class="navbar">
+    <div class="navbar-inner container">
+      <a class="brand-group" href="#">
+        <div class="brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+            <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+            <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+            <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h2>VisionAI Platform</h2>
+          <span>YOLO-World Realtime Suite</span>
+        </div>
+      </a>
+
+      <div class="navbar-right">
+        <div class="system-pill">
+          <span class="system-dot"></span>
+          <span>Motor de Inferencia Listo</span>
+        </div>
+        <span class="uni-pill">UNEMI · Construcción de Software</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- ═══════════════════════════════════════════════════════════
+       DASHBOARD HEADER (LIMPIO)
+  ═══════════════════════════════════════════════════════════ -->
+    <section class="dashboard-header">
+      <div>
+        <div class="hero-badge">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+          </svg>
+          <span>Computer Vision Suite</span>
+        </div>
+        <h1 class="dashboard-title">Detección de Objetos en Tiempo Real</h1>
+        <p class="dashboard-subtitle">Inferencia continua sobre flujo de video mediante YOLO-World v2 con persistencia
+          transaccional en PostgreSQL.</p>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════
+       MAIN 2-COLUMN GRID (70% / 30%)
+  ═══════════════════════════════════════════════════════════ -->
+    <div class="main-grid">
+
+      <!-- ── COLUMNA IZQUIERDA (70%): VISOR DE CÁMARA EN DIRECTO ── -->
+      <div class="camera-column">
+        <section class="card camera-card" aria-labelledby="titulo-camara">
+          <div class="card-header">
+            <div class="card-header-left">
+              <h3 id="titulo-camara">Cámara en directo</h3>
+              <p>Transmisión de baja latencia con bounding boxes predictivos</p>
+            </div>
+            <span class="badge badge-idle" id="badge-estado">Inactivo</span>
+          </div>
+
+          <form id="token" hidden>{% csrf_token %}</form>
+
+          <div class="camera-viewport">
+            <div class="camera-placeholder" id="espera">
+              <div class="placeholder-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path
+                    d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
+                  <circle cx="12" cy="13" r="3" />
+                </svg>
+              </div>
+              <p id="aviso">La cámara está detenida</p>
+              <p id="aviso-sub">Presiona «Iniciar detección» para habilitar el sensor y comenzar el análisis en tiempo
+                real.</p>
+            </div>
+            <img id="video" alt="Transmisión de video con objetos detectados" hidden>
+          </div>
+
+          <div class="camera-footer">
+            <div class="status-indicator">
+              <span class="status-dot" id="status-dot"></span>
+              <p id="estado" role="status">Estado: detenido</p>
+            </div>
+            <span class="camera-spec">MJPEG · 320px · conf &ge; 0.25</span>
+          </div>
+
+          <div class="camera-msg-container">
+            <div id="mensaje" role="status" hidden></div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ── COLUMNA DERECHA (30%): CONTROLES DE CAPTURA ── -->
+      <div class="controls-column">
+        <section class="card controls-panel" aria-labelledby="titulo-controles">
+          <div class="controls-header">
+            <h4 id="titulo-controles">Controles de Captura</h4>
+            <p>Control de sesión y guardado de resultados</p>
+          </div>
+
+          <div class="controls-buttons">
+            <button class="btn btn-primary" id="iniciar" type="button">
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+              </svg>
+              <span>Iniciar detección</span>
+            </button>
+
+            <button class="btn btn-danger" id="detener" type="button" disabled>
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <rect x="4" y="4" width="12" height="12" rx="2" />
+              </svg>
+              <span id="texto-detener">Detener</span>
+            </button>
+
+            <button class="btn btn-success" id="guardar" type="button" disabled>
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M4 2.5h10l3 3V17H3V2.5z" />
+                <path d="M6 2.5V8h7V2.5M6 17v-6h8v6" />
+              </svg>
+              <span id="texto-guardar">Guardar detección</span>
+            </button>
+          </div>
+
+          <div class="controls-tip">
+            <div class="tip-icon">
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                  clip-rule="evenodd" />
+              </svg>
+            </div>
+            <p class="tip-text">Al presionar <strong>Guardar detección</strong>, se crea un registro transaccional en
+              PostgreSQL con los objetos detectados en ese fotograma.</p>
+          </div>
+        </section>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+       HISTORIAL DE DETECCIONES (100% ANCHO INFERIOR)
+  ═══════════════════════════════════════════════════════════ -->
+    <section class="card history-card" aria-labelledby="titulo-historial">
+      <div class="card-header">
+        <div class="card-header-left">
+          <h3 id="titulo-historial">Historial de detecciones</h3>
+          <p id="total">Cargando registros persistidos en PostgreSQL…</p>
+        </div>
+        <button class="btn-outline" id="actualizar" type="button">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 4v6h-6" />
+            <path d="M1 20v-6h6" />
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+          </svg>
+          <span>Actualizar datos</span>
+        </button>
+      </div>
+
+      <div class="table-responsive" tabindex="0" role="region" aria-label="Tabla de registros de detecciones">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col" style="width: 100px;">Registro</th>
+              <th scope="col">Objeto Identificado</th>
+              <th scope="col">Nivel de Confianza</th>
+              <th scope="col">Fecha y Hora (Ecuador)</th>
+            </tr>
+          </thead>
+          <tbody id="filas">
+            <tr>
+              <td colspan="4" class="table-empty">Cargando registros desde la base de datos…</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="history-footer">
+        <span>Mostrando los últimos 50 registros almacenados de forma atómica.</span>
+        <span class="footer-secure">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd"
+              d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z"
+              clip-rule="evenodd" />
+          </svg>
+          Persistencia optimizada de metadatos (Sin video residente)
+        </span>
+      </div>
+    </section>
+  </main>
+
+  <!-- ═══════════════════════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════════════════════ -->
+  <footer>
+    <div class="footer-inner container">
+      <span>UNEMI · Universidad Estatal de Milagro — Construcción de Software</span>
+      <span>Arquitectura Django + YOLO-World v2 + PostgreSQL</span>
+    </div>
+  </footer>
+
+  <!-- ═══════════════════════════════════════════════════════════
+     JAVASCRIPT FRONTEND CONTROLLER
+═══════════════════════════════════════════════════════════ -->
+  <script>
+    const rutas = {
+      video: "{% url 'detector:video' %}",
+      detener: "{% url 'detector:detener' %}",
+      estado: "{% url 'detector:estado' %}",
+      guardar: "{% url 'detector:guardar' %}",
+      historial: "{% url 'detector:historial' %}"
+    };
+
+    const porId = id => document.getElementById(id);
+    const video = porId("video");
+    const estado = porId("estado");
+    const iniciar = porId("iniciar");
+    const detener = porId("detener");
+    const guardar = porId("guardar");
+    const badgeEstado = porId("badge-estado");
+    const statusDot = porId("status-dot");
+
+    let activo = false;
+    let guardando = false;
+    let deteniendo = false;
+    let consultando = false;
+    let hayObjetos = false;
+    let paradaPendiente = false;
+    let version = 0;
+    let camaraSeleccionadaIndex = 0;
+
+    const csrf = document.querySelector('[name="csrfmiddlewaretoken"]').value;
+    const formateadorFecha = new Intl.DateTimeFormat("es-EC", {
+      dateStyle: "medium",
+      timeStyle: "medium",
+      timeZone: "America/Guayaquil"
+    });
+    const porcentaje = new Intl.NumberFormat("es-EC", { maximumFractionDigits: 1 });
+
+    /* ─────────────────────────────────────────────────────────────
+       SISTEMA DE NOTIFICACIONES EN PANTALLA
+    ───────────────────────────────────────────────────────────── */
+    function avisar(texto, error = false) {
+      const mensaje = porId("mensaje");
+      mensaje.textContent = texto;
+      mensaje.classList.toggle("error", error);
+      mensaje.hidden = !texto;
+    }
+
+    async function solicitar(url, opciones = {}) {
+      const respuesta = await fetch(url, { cache: "no-store", ...opciones });
+      let datos;
+      try {
+        datos = await respuesta.json();
+      } catch {
+        throw new Error("No se pudo completar la solicitud. Revisa la terminal del servidor.");
       }
-      for (const registro of datos.registros) {
-        const fila = cuerpo.insertRow();
-        for (const valor of [registro.id, registro.objeto,
-          `${porcentaje.format(registro.confianza)} %`, fecha.format(new Date(registro.fecha))]) {
-          fila.insertCell().textContent = valor;
+      if (!respuesta.ok) throw new Error(datos.error || "Error en la respuesta del servidor.");
+      return datos;
+    }
+
+    function post(url, opciones = {}) {
+      return solicitar(url, { ...opciones, method: "POST", headers: { "X-CSRFToken": csrf } });
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       GESTIÓN DE ESTADOS Y BOTONES
+    ───────────────────────────────────────────────────────────── */
+    function actualizarBadge() {
+      if (activo) {
+        badgeEstado.className = "badge badge-live";
+        badgeEstado.textContent = "En vivo";
+        statusDot.className = "status-dot active";
+      } else if (deteniendo || paradaPendiente) {
+        badgeEstado.className = "badge badge-idle";
+        badgeEstado.textContent = "Deteniendo…";
+        statusDot.className = "status-dot stopping";
+      } else {
+        badgeEstado.className = "badge badge-idle";
+        badgeEstado.textContent = "Inactivo";
+        statusDot.className = "status-dot";
+      }
+    }
+
+    function botones() {
+      iniciar.disabled = activo || paradaPendiente || deteniendo;
+      detener.disabled = (!activo && !paradaPendiente) || deteniendo;
+      porId("texto-detener").textContent = paradaPendiente && !deteniendo ? "Reintentar detener" : "Detener";
+      guardar.disabled = !activo || !hayObjetos || guardando || deteniendo;
+      actualizarBadge();
+    }
+
+    async function consultarEstado() {
+      if (!activo || consultando) return;
+      consultando = true;
+      const actual = version;
+      try {
+        const datos = await solicitar(rutas.estado);
+        if (!activo || actual !== version) return;
+        hayObjetos = datos.listo && datos.cantidad > 0;
+
+        estado.textContent = datos.listo
+          ? `Estado: detección activa · ${datos.cantidad} objetos en el último fotograma`
+          : "Estado: esperando flujo de cámara…";
+        botones();
+      } catch (error) {
+        if (activo && actual === version) avisar(error.message, true);
+      } finally {
+        consultando = false;
+      }
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       MODAL DE PERMISO Y DETECCIÓN NATIVA DE HARDWARE
+    ───────────────────────────────────────────────────────────── */
+    const modal = porId("modal-permiso");
+    const modalCancelar = porId("modal-cancelar");
+    const modalPermitir = porId("modal-permitir");
+    const modalEstado = porId("modal-estado");
+    const modalEstadoTexto = porId("modal-estado-texto");
+    const modalInfo = porId("modal-info");
+    const selectorCamara = porId("selector-camara");
+    const listaCamaras = porId("lista-camaras");
+    const modalBtnTexto = porId("modal-btn-texto");
+    let permisoConcedido = false;
+
+    function mostrarModal() {
+      modal.hidden = false;
+      modal.offsetHeight;
+      modal.classList.add("visible");
+    }
+
+    function cerrarModal() {
+      modal.classList.remove("visible");
+      setTimeout(() => { modal.hidden = true; }, 220);
+    }
+
+    modalCancelar.addEventListener("click", cerrarModal);
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) cerrarModal();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !modal.hidden) cerrarModal();
+    });
+
+    async function solicitarPermisoYNavegador() {
+      if (permisoConcedido && !selectorCamara.hidden) {
+        camaraSeleccionadaIndex = parseInt(listaCamaras.value, 10) || 0;
+        cerrarModal();
+        iniciarDeteccion(camaraSeleccionadaIndex);
+        return;
+      }
+
+      modalInfo.hidden = true;
+      modalEstado.hidden = false;
+      modalEstado.className = "modal-status loading";
+      modalEstadoTexto.textContent = "El navegador te está solicitando permiso para usar la cámara (mira la ventana emergente arriba)…";
+      modalPermitir.disabled = true;
+
+      try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error("Tu navegador o conexión actual no permite invocar la cámara.");
         }
+
+        // Despliega el cuadro nativo del navegador arriba: "¿Permitir cámara?"
+        const streamTemporal = await navigator.mediaDevices.getUserMedia({ video: true });
+
+        // Detener stream nativo de inmediato para no saturar el canal de OpenCV en backend
+        streamTemporal.getTracks().forEach(t => t.stop());
+
+        // Enumerar cámaras conectadas
+        const dispositivos = await navigator.mediaDevices.enumerateDevices();
+        const camarasVideo = dispositivos.filter(d => d.kind === "videoinput");
+
+        permisoConcedido = true;
+        modalEstado.className = "modal-status success";
+        modalEstadoTexto.textContent = "✓ Permiso concedido por el navegador.";
+
+        listaCamaras.replaceChildren();
+        if (camarasVideo.length > 0) {
+          camarasVideo.forEach((cam, idx) => {
+            const opt = document.createElement("option");
+            opt.value = idx;
+            opt.textContent = cam.label || `Cámara ${idx + 1}`;
+            listaCamaras.appendChild(opt);
+          });
+          selectorCamara.hidden = false;
+          modalBtnTexto.textContent = "Iniciar con esta cámara";
+          modalPermitir.disabled = false;
+
+          // Si solo hay una cámara conectada, iniciar directamente
+          if (camarasVideo.length === 1) {
+            setTimeout(() => {
+              cerrarModal();
+              iniciarDeteccion(0);
+            }, 500);
+          }
+        } else {
+          const opt = document.createElement("option");
+          opt.value = 0;
+          opt.textContent = "Cámara predeterminada (Índice 0)";
+          listaCamaras.appendChild(opt);
+          selectorCamara.hidden = false;
+          modalBtnTexto.textContent = "Iniciar cámara";
+          modalPermitir.disabled = false;
+        }
+      } catch (err) {
+        modalEstado.className = "modal-status error";
+        modalEstadoTexto.textContent = err.name === "NotAllowedError" || err.name === "PermissionDeniedError"
+          ? "Permiso denegado por el navegador. Permite el acceso a la cámara en el icono de candado en la barra superior."
+          : `Aviso de cámara: ${err.message}`;
+        modalPermitir.disabled = false;
+        modalBtnTexto.textContent = "Reintentar permiso";
       }
-    } catch (error) {
-      porId("total").textContent = "No se pudo cargar el historial";
-      avisar(error.message, true);
-    } finally { boton.disabled = false; }
-  }
-  iniciar.addEventListener("click", () => {
-    if (activo || paradaPendiente || deteniendo) return;
-    version++; activo = true; hayObjetos = false;
-    avisar(""); botones();
-    porId("espera").hidden = true; video.hidden = false;
-    estado.textContent = "Estado: iniciando el modelo y la cámara…";
-    video.src = rutas.video + "?t=" + Date.now();
-  });
-  async function parar() {
-    if (deteniendo) return;
-    version++; activo = false; hayObjetos = false; deteniendo = true;
-    paradaPendiente = true;
-    botones();
-    video.removeAttribute("src"); video.hidden = true;
-    porId("espera").hidden = false;
-    porId("aviso").textContent = "Esperando que se libere la cámara…";
-    estado.textContent = "Estado: deteniendo…";
-    const controlador = new AbortController();
-    const limite = Date.now() + 20000;
-    const temporizador = setTimeout(() => controlador.abort(), 20000);
-    try {
-      while (true) {
-        const datos = await post(rutas.detener, { signal: controlador.signal });
-        if (datos.detenido === true) break;
-        if (Date.now() >= limite) throw new Error("La cámara todavía no confirmó la detención. Pulsa Reintentar detener.");
-        await new Promise(resolve => setTimeout(resolve, 400));
+    }
+
+    modalPermitir.addEventListener("click", solicitarPermisoYNavegador);
+
+    /* ─────────────────────────────────────────────────────────────
+       HISTORIAL DE DETECCIONES
+    ───────────────────────────────────────────────────────────── */
+    async function cargarHistorial() {
+      const boton = porId("actualizar");
+      boton.disabled = true;
+      try {
+        const datos = await solicitar(rutas.historial);
+        porId("total").textContent = `${datos.total} registros persistidos en la base de datos`;
+
+        const cuerpo = porId("filas");
+        cuerpo.replaceChildren();
+
+        if (!datos.registros.length) {
+          const fila = cuerpo.insertRow();
+          const celda = fila.insertCell();
+          celda.colSpan = 4;
+          celda.className = "table-empty";
+          celda.textContent = "No hay registros guardados en la base de datos aún.";
+          return;
+        }
+
+        for (const registro of datos.registros) {
+          const fila = cuerpo.insertRow();
+
+          // 1. ID
+          const cId = fila.insertCell();
+          cId.className = "col-id";
+          cId.textContent = `#${registro.id}`;
+
+          // 2. Objeto con pill estilizado
+          const cObj = fila.insertCell();
+          cObj.className = "col-object";
+          cObj.innerHTML = `<span class="object-pill">${registro.objeto}</span>`;
+
+          // 3. Nivel de Confianza con barra visual brillante neón
+          // 3. Nivel de Confianza con barra visual
+          const cConf = fila.insertCell();
+          const valorPorcentaje = registro.confianza;
+          cConf.innerHTML = `
+          <div class="confidence-wrap">
+            <div class="confidence-bar-bg">
+              <div class="confidence-bar-fill" style="width: ${Math.min(Math.max(valorPorcentaje, 0), 100)}%;"></div>
+            </div>
+            <span class="confidence-value">${porcentaje.format(valorPorcentaje)}%</span>
+          </div>
+        `;
+
+          // 4. Fecha y Hora
+          const cFecha = fila.insertCell();
+          cFecha.className = "col-date";
+          cFecha.textContent = formateadorFecha.format(new Date(registro.fecha));
+        }
+      } catch (error) {
+        porId("total").textContent = "No se pudo actualizar el historial";
+        avisar(error.message, true);
+      } finally {
+        boton.disabled = false;
       }
-      paradaPendiente = false;
-      porId("aviso").textContent = "La cámara está detenida";
-      estado.textContent = "Estado: detenido";
-    } catch (error) {
-      porId("aviso").textContent = "No se pudo confirmar que la cámara se detuvo";
-      estado.textContent = "Estado: detención sin confirmar";
-      avisar(controlador.signal.aborted
-        ? "La cámara tardó en responder. Pulsa Reintentar detener."
-        : `${error.message} Puedes reintentar la detención.`, true);
-    } finally {
-      clearTimeout(temporizador);
-      deteniendo = false; botones();
     }
-  }
-  detener.addEventListener("click", parar);
-  video.addEventListener("error", () => {
-    if (activo) {
-      avisar("No se pudo mostrar el video. Revisa la cámara y la terminal de Django.", true);
-      parar();
+
+    /* ─────────────────────────────────────────────────────────────
+       CONTROL DE CÁMARA (INICIAR / DETENER / GUARDAR)
+    ───────────────────────────────────────────────────────────── */
+    function iniciarDeteccion(camaraIndex = 0) {
+      if (activo || paradaPendiente || deteniendo) return;
+      version++;
+      activo = true;
+      hayObjetos = false;
+      avisar("");
+      botones();
+
+      porId("espera").hidden = true;
+      video.hidden = false;
+      estado.textContent = "Estado: inicializando modelo YOLO-World y hardware…";
+      video.src = `${rutas.video}?camara=${encodeURIComponent(camaraIndex)}&t=${Date.now()}`;
     }
-  });
-  guardar.addEventListener("click", async () => {
-    if (!activo || guardando || !hayObjetos) return;
-    guardando = true; botones(); porId("texto-guardar").textContent = "Guardando…";
-    try {
-      const datos = await post(rutas.guardar);
-      avisar(datos.mensaje);
-      await cargarHistorial();
-    } catch (error) { avisar(error.message, true); }
-    finally { guardando = false; porId("texto-guardar").textContent = "Guardar detección"; botones(); }
-  });
-  porId("actualizar").addEventListener("click", cargarHistorial);
-  window.addEventListener("pagehide", () => {
-    if (activo || paradaPendiente) {
-      const datos = new FormData(); datos.append("csrfmiddlewaretoken", csrf);
-      navigator.sendBeacon(rutas.detener, datos);
+
+    iniciar.addEventListener("click", () => {
+      if (activo || paradaPendiente || deteniendo) return;
+      mostrarModal();
+    });
+
+    async function parar() {
+      if (deteniendo) return;
+      version++;
+      activo = false;
+      hayObjetos = false;
+      deteniendo = true;
+      paradaPendiente = true;
+      botones();
+
+      video.removeAttribute("src");
+      video.hidden = true;
+      porId("espera").hidden = false;
+      porId("aviso").textContent = "Esperando liberación de la cámara…";
+      porId("aviso-sub").textContent = "Cerrando stream y liberando recursos del sistema.";
+      estado.textContent = "Estado: deteniendo…";
+
+      const controlador = new AbortController();
+      const limite = Date.now() + 20000;
+      const temporizador = setTimeout(() => controlador.abort(), 20000);
+
+      try {
+        while (true) {
+          const datos = await post(rutas.detener, { signal: controlador.signal });
+          if (datos.detenido === true) break;
+          if (Date.now() >= limite) throw new Error("Tiempo de espera agotado al detener. Puedes reintentar.");
+          await new Promise(resolve => setTimeout(resolve, 400));
+        }
+        paradaPendiente = false;
+        porId("aviso").textContent = "La cámara está detenida";
+        porId("aviso-sub").textContent = "Presiona «Iniciar detección» para habilitar el sensor y comenzar el análisis en tiempo real.";
+        estado.textContent = "Estado: detenido";
+      } catch (error) {
+        porId("aviso").textContent = "No se confirmó la detención de la cámara";
+        porId("aviso-sub").textContent = "Intenta pulsar 'Reintentar detener'.";
+        estado.textContent = "Estado: detención pendiente";
+        avisar(controlador.signal.aborted ? "La cámara tardó en responder. Pulsa Reintentar detener." : error.message, true);
+      } finally {
+        clearTimeout(temporizador);
+        deteniendo = false;
+        botones();
+      }
     }
-  });
-  setInterval(consultarEstado, 1000);
-  cargarHistorial();
-</script>
+
+    detener.addEventListener("click", parar);
+
+    video.addEventListener("error", () => {
+      if (activo) {
+        avisar("No se pudo proyectar el video. Verifica la conexión de la cámara y los logs del servidor.", true);
+        parar();
+      }
+    });
+
+    guardar.addEventListener("click", async () => {
+      if (!activo || guardando || !hayObjetos) return;
+      guardando = true;
+      botones();
+      porId("texto-guardar").textContent = "Guardando en BD…";
+      try {
+        const datos = await post(rutas.guardar);
+        avisar(datos.mensaje);
+        await cargarHistorial();
+      } catch (error) {
+        avisar(error.message, true);
+      } finally {
+        guardando = false;
+        porId("texto-guardar").textContent = "Guardar detección";
+        botones();
+      }
+    });
+
+    porId("actualizar").addEventListener("click", cargarHistorial);
+
+    window.addEventListener("pagehide", () => {
+      if (activo || paradaPendiente) {
+        const datos = new FormData();
+        datos.append("csrfmiddlewaretoken", csrf);
+        navigator.sendBeacon(rutas.detener, datos);
+      }
+    });
+
+    // Consultar estado en tiempo real cada 1 segundo
+    setInterval(consultarEstado, 1000);
+
+    // Cargar historial al cargar la página
+    cargarHistorial();
+  </script>
 </body>
+
 </html>
